@@ -13,7 +13,6 @@ keymap({ "n", "v", "o" }, "<Up>",  'k', { noremap = true, silent = true, desc = 
 keymap({ "n", "v", "o" }, "<Down>", 'j', { noremap = true, silent = true, desc = 'Down' })
 keymap({ "n", "v", "o" }, "<Left>",  'h', { noremap = true, silent = true, desc = 'Left' })
 keymap({ "n", "v", "o" }, "<Right>", 'l', { noremap = true, silent = true, desc = 'Right' })
-keymap("n", "s", "<C-w>", { noremap = true, silent = true, desc = "Override 's' to act like Ctrl-w" })
 keymap({ "n", "v", "o" }, "<C-j>", "5j", { noremap = true, silent = true, desc = "Move 5 lines down" })
 keymap({ "n", "v", "o" }, "<C-k>", "5k", { noremap = true, silent = true, desc = "Move 5 lines up" })
 keymap({ "n", "v", "o" }, "<C-h>", "^",  { noremap = true, silent = true, desc = "Jump to first non-blank" })
@@ -83,7 +82,7 @@ local function ToggleSplit()
       vim.cmd("NvimTreeClose")
       break
     end
-  end
+  end                                                                                                                                              
 
   local wins = {}
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
@@ -207,3 +206,38 @@ local function toggle_source_header()
 end
 
 keymap("n", "<leader>h", toggle_source_header,{ desc = "Toggle between C/C++ source and header" })
+
+
+
+
+-- unbind the default 's' in normal mode
+vim.keymap.set("n", "s", "<Nop>", { silent = true, desc = "Unbind default 's'" })
+
+-- helper: focus the tree, move N nodes, open via API
+local function tree_move_and_open(direction)
+  -- only require the API when you actually invoke the mapping
+  local api = require("nvim-tree.api")
+
+  -- get the count (default to 1)
+  local cnt = vim.v.count
+  if cnt == 0 then cnt = 1 end
+
+  -- open & focus the tree window
+  api.tree.open()
+  vim.cmd("NvimTreeFocus")
+
+  -- move the cursor N lines up/down
+  local move_cmd = tostring(cnt) .. (direction == "up" and "k" or "j")
+  vim.cmd("silent! normal! " .. move_cmd)
+
+  -- grab the node under the cursor, then open it
+  local node = api.tree.get_node_under_cursor()
+  api.node.open.edit(node)
+end
+
+-- map s<Up> and s<Down> in normal mode
+vim.keymap.set("n", "s<Up>", function() tree_move_and_open("up") end,
+  { silent = true, desc = "NvimTree: move up N entries and open" })
+vim.keymap.set("n", "s<Down>", function() tree_move_and_open("down") end,
+  { silent = true, desc = "NvimTree: move down N entries and open" })
+
