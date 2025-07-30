@@ -1,6 +1,6 @@
-require("user.options")
-require("user.lazy")
-require("user.keymaps")
+require("options")
+require("lazy-config")
+require("keymaps")
 
 vim.opt.termguicolors = true
 vim.opt.guicursor = ""
