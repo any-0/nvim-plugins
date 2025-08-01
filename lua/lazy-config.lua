@@ -57,9 +57,10 @@ require("lazy").setup({
             "neovim/nvim-lspconfig",
         },
         after = "mason.nvim",
+        lazy = false,
         config = function()
             require("mason-lspconfig").setup({
-                ensure_installed = { "pylsp" },   -- ← use pylsp instead of pyright
+                ensure_installed = { "pylsp", "rust_analyzer" },   -- ← use pylsp instead of pyright
                 handlers = {
                     ["pylsp"] = function()
                         require("lspconfig").pylsp.setup({
@@ -74,6 +75,14 @@ require("lazy").setup({
                                     },
                                 },
                             },
+                        })
+                    end,
+                    ["rust_analyzer"] = function()
+                        require("lspconfig").rust_analyzer.setup({
+                            on_attach    = require("plugins.lsp").on_attach,
+                            capabilities = require("plugins.lsp").capabilities,
+                            -- here you can add any rust-analyzer–specific settings if you like:
+                            -- settings = { ["rust-analyzer"] = { cargo = { allFeatures = true } } },
                         })
                     end,
                     function(server_name)
@@ -100,4 +109,3 @@ vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none", fg = nil })
 
 require("plugins.lsp")
 require("plugins.treesitter")
-
